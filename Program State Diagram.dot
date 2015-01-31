@@ -1,8 +1,13 @@
 // Written for processing into an image with graphviz
 // by: Shaun Husain
 
-// Example command (outputs and opens a png):
-// dot -Tpng Program\ State\ Diagram.dot > test.png && xdg-open test.png
+// Example command (outputs file):
+
+// dot -Tpng "Program State Diagram.dot" > test.png
+
+// Example command (output file and open)
+
+// dot -Tpng "Program State Diagram.dot" > test.png && xdg-open test.png
 
 digraph RobotControlSystem {
   rankdir=LR;
