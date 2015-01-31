@@ -1,0 +1,105 @@
+// Written for processing into an image with graphviz
+// by: Shaun Husain
+
+// Example command (outputs and opens a png):
+// dot -Tpng Program\ State\ Diagram.dot > test.png && xdg-open test.png
+
+digraph RobotControlSystem {
+  rankdir=LR;
+  compound=true;
+
+  subgraph invis{
+    node [style=invis]
+    1->2->3 [style=invis];
+  }
+
+  //subgraph {
+  //  1->2->3;
+  //}
+  
+  fillcolor=azure;
+  fontsize=18;
+  fontname=Helvetica;
+  style="filled";
+  page="22,17";
+  ratio="filled";
+  node [fontname=Helvetica, fontsize=14]
+
+  subgraph start_and_end{
+    node [
+      shape=doublecircle,
+      fillcolor=azure1,
+      style="filled"
+    ];
+
+    start [label="Start"];
+    end [label="End"];
+  }
+
+
+  subgraph actions {
+    node [
+      style="filled",
+      fillcolor=azure2,
+      shape=Mrecord
+    ]
+    rotate_ccw [label="{Rotate\nCounter\nClockwise|{L Motor BWD|R Motor FWD}}"];
+    rotate_cw [label="{Rotate\nClockwise|{R Motor BWD|L Motor FWD}}"];
+    drive_bwd [label="{Drive\nBackward|{R Motor BWD|L Motor BWD}}"];
+    drive_fwd [label="{Drive\nForward|{R Motor FWD|L Motor FWD}}"];
+    lift_up [label="{Raise|Actuator FWD}"]
+    lift_down [label="{Lower|Actuator BWD}"]
+    grab_forward [label="{Grab\n Forward|{Grab Motors BWD|Grab Open|Grab Close}}"]
+    grab_backward [label="{Grab\n Backward|{Grab Motors FWD|Grab Open}}"]
+  }
+
+  subgraph conditions {
+    node [
+      shape=diamond,
+      fillcolor=azure,
+      style="filled"
+    ]
+    joystick_buttons [label=<<b>Command Mode</b><br/>Button Condition>];
+
+    loc_active [label=<<b>Locomotion</b><br/>Joystick<br/>Condition>];
+    grab_active [label=<<b>Grab</b><br/>Joystick<br/>Position>];
+    lift_active [label=<<b>Lift</b><br/>Joystick<br/>Position>];
+  }
+  
+  
+  subgraph cluster_movement{
+    label="Robot Locomotion";
+    joystick_buttons -> loc_active:w [label="No Button\nPressed"];
+    loc_active -> rotate_ccw:w [label="Left"];
+    loc_active -> drive_fwd:w [label="Forward"];
+    loc_active -> drive_bwd:w [label="Back"];
+    loc_active -> rotate_cw:w [label="Right"];
+  }
+
+  subgraph cluster_grab_crate{
+    label="Grab Motion";
+    joystick_buttons ->  grab_active:w [label="Trigger\nPressed"];
+    grab_active -> grab_forward:w [label="Forward"];
+    grab_active -> grab_backward:w [label="Back"];
+  }
+  
+  
+  subgraph cluster_lift {
+    label="Lift Control";
+    joystick_buttons ->  lift_active:w [label="Hat\nPressed"];
+    lift_active -> lift_down:w [label="Forward"];
+    lift_active -> lift_up:w [label="Back"];
+  }
+  
+  start:e -> joystick_buttons:w;
+  end:s->start:s[label="Repeat"];
+  rotate_cw:e->end [ltail=cluster_movement];
+  lift_up:e->end [ltail=cluster_lift];
+  grab_forward:e->end [ltail=cluster_grab_crate];
+
+  {rank=same 1 start}
+  {rank=same 2 joystick_buttons}
+  {rank=same 3 end}
+
+  label="Robot Control System";
+}
